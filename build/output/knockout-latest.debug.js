@@ -2356,6 +2356,7 @@ ko.bindingHandlers['foreach'] = {
                 'afterRender': unwrappedValue['afterRender'],
                 'beforeMove': unwrappedValue['beforeMove'],
                 'afterMove': unwrappedValue['afterMove'],
+                'afterAllRender': unwrappedValue['afterAllRender'],
                 'templateEngine': ko.nativeTemplateEngine.instance
             };
         };
@@ -3100,6 +3101,9 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
             // If the array items are observables, though, they will be unwrapped in executeTemplateForArrayItem and managed within setDomNodeChildrenFromArrayMapping.
             ko.dependencyDetection.ignore(ko.utils.setDomNodeChildrenFromArrayMapping, null, [targetNode, filteredArray, executeTemplateForArrayItem, options, activateBindingsCallback]);
 
+            // Optional callback for after items have been added to the DOM
+            if(options['afterAllRender'])
+                options['afterAllRender']();
         }, null, { disposeWhenNodeIsRemoved: targetNode });
     };
 
