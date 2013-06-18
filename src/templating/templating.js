@@ -152,6 +152,9 @@
             // If the array items are observables, though, they will be unwrapped in executeTemplateForArrayItem and managed within setDomNodeChildrenFromArrayMapping.
             ko.dependencyDetection.ignore(ko.utils.setDomNodeChildrenFromArrayMapping, null, [targetNode, filteredArray, executeTemplateForArrayItem, options, activateBindingsCallback]);
 
+            // Optional callback for after items have been added to the DOM
+            if(options['afterAllRender'])
+                options['afterAllRender']();
         }, null, { disposeWhenNodeIsRemoved: targetNode });
     };
 
