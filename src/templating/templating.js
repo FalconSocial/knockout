@@ -159,7 +159,7 @@
 
             // Optional callback for after items have been added to the DOM
             if(options['afterAllRender'])
-                options['afterAllRender'].call(parentBindingContext.$data, addedNodes.concat([]), parentBindingContext.$data);
+                ko.dependencyDetection.ignore(options['afterAllRender'], parentBindingContext.$data, [targetNode, addedNodes.concat([]), parentBindingContext.$data]);
         }, null, { disposeWhenNodeIsRemoved: targetNode });
     };
     var templateComputedDomDataKey = '__ko__templateComputedDomDataKey__';
