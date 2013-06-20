@@ -2362,6 +2362,7 @@ ko.bindingHandlers['foreach'] = {
                 'afterRender': unwrappedValue['afterRender'],
                 'beforeMove': unwrappedValue['beforeMove'],
                 'afterMove': unwrappedValue['afterMove'],
+                'afterAllRender': unwrappedValue['afterAllRender'],
                 'templateEngine': ko.nativeTemplateEngine.instance
             };
         };
@@ -3074,7 +3075,8 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
     ko.renderTemplateForEach = function (template, arrayOrObservableArray, options, targetNode, parentBindingContext) {
         // Since setDomNodeChildrenFromArrayMapping always calls executeTemplateForArrayItem and then
         // activateBindingsCallback for added items, we can store the binding context in the former to use in the latter.
-        var arrayItemContext;
+        var arrayItemContext,
+            addedNodes = [];
 
         // This will be called by setDomNodeChildrenFromArrayMapping to get the nodes to add to targetNode
         var executeTemplateForArrayItem = function (arrayValue, index) {
@@ -3088,6 +3090,10 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
         // This will be called whenever setDomNodeChildrenFromArrayMapping has added nodes to targetNode
         var activateBindingsCallback = function(arrayValue, addedNodesArray, index) {
             activateBindingsOnContinuousNodeArray(addedNodesArray, arrayItemContext);
+
+            if(options['afterAllRender'])
+                addedNodes = addedNodes.concat(addedNodesArray);
+
             if (options['afterRender'])
                 options['afterRender'](addedNodesArray, arrayValue);
         };
@@ -3106,9 +3112,11 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
             // If the array items are observables, though, they will be unwrapped in executeTemplateForArrayItem and managed within setDomNodeChildrenFromArrayMapping.
             ko.dependencyDetection.ignore(ko.utils.setDomNodeChildrenFromArrayMapping, null, [targetNode, filteredArray, executeTemplateForArrayItem, options, activateBindingsCallback]);
 
+            // Optional callback for after items have been added to the DOM
+            if(options['afterAllRender'])
+                ko.dependencyDetection.ignore(options['afterAllRender'], parentBindingContext.$data, [targetNode, addedNodes.concat([]), parentBindingContext.$data]);
         }, null, { disposeWhenNodeIsRemoved: targetNode });
     };
-
     var templateComputedDomDataKey = '__ko__templateComputedDomDataKey__';
     function disposeOldComputedAndStoreNewOne(element, newComputed) {
         var oldComputed = ko.utils.domData.get(element, templateComputedDomDataKey);
